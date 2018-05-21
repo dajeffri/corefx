@@ -959,105 +959,181 @@ namespace System.Reflection.Metadata.Tests
         [Fact]
         public unsafe void GetMemberRefTreatmentAndRowIdTest()
         {
-            byte[] peImage = (byte[])WinRT.Lib.Clone();
+            MetadataBuilder mdBuilder = new MetadataBuilder();
 
-            GCHandle pinned = GetPinnedPEImage(peImage);
-            PEHeaders headers = new PEHeaders(new MemoryStream(peImage));
-            MetadataReader reader = new MetadataReader((byte*)pinned.AddrOfPinnedObject() + headers.MetadataStartOffset, headers.MetadataSize);
-            Assert.Equal(738, reader.GetMemberReference(MemberReferenceHandle.FromRowId(1)).Name.GetHeapOffset());
+            mdBuilder.AddModule(0, default(StringHandle), default(GuidHandle), default(GuidHandle), default(GuidHandle));
+            mdBuilder.AddMemberReference(default(TypeDefinitionHandle), default(StringHandle), default(BlobHandle));
+
+            MetadataReader reader = GetMetadataReader(mdBuilder);
+            Assert.Equal(default(TypeDefinitionHandle), reader.GetMemberReference(MemberReferenceHandle.FromRowId(1)).Parent);
+            Assert.Equal(default(StringHandle), reader.GetMemberReference(MemberReferenceHandle.FromRowId(1)).Name);
+            Assert.Equal(default(BlobHandle), reader.GetMemberReference(MemberReferenceHandle.FromRowId(1)).Signature);
         }
 
         [Fact]
         public unsafe void GetGenericParameterConstraintTest()
         {
-            byte[] peImage = (byte[])PortablePdbs.DocumentsPdb.Clone();
-            GCHandle pinned = GetPinnedPEImage(peImage);
-            MetadataReader reader = new MetadataReader((byte*)pinned.AddrOfPinnedObject(), peImage.Length);
-            Assert.Throws<BadImageFormatException>(() => reader.GetGenericParameterConstraint(GenericParameterConstraintHandle.FromRowId(1)).Parameter.RowId);
+            MetadataBuilder mdBuilder = new MetadataBuilder();
+
+            mdBuilder.AddModule(0, default(StringHandle), default(GuidHandle), default(GuidHandle), default(GuidHandle));
+            mdBuilder.AddGenericParameterConstraint(default(GenericParameterHandle), default(TypeDefinitionHandle));
+
+            MetadataReader reader = GetMetadataReader(mdBuilder);
+            Assert.Equal(default(GenericParameterHandle), reader.GetGenericParameterConstraint(GenericParameterConstraintHandle.FromRowId(1)).Parameter);
+            Assert.Equal(default(TypeDefinitionHandle), reader.GetGenericParameterConstraint(GenericParameterConstraintHandle.FromRowId(1)).Type);
         }
 
         [Fact]
         public unsafe void GetManifestResourceTest()
         {
-            byte[] peImage = (byte[])PortablePdbs.DocumentsPdb.Clone();
-            GCHandle pinned = GetPinnedPEImage(peImage);
-            MetadataReader reader = new MetadataReader((byte*)pinned.AddrOfPinnedObject(), peImage.Length);
-            Assert.Throws<BadImageFormatException>(() => reader.GetManifestResource(ManifestResourceHandle.FromRowId(1)).Name.GetHeapOffset());
+            MetadataBuilder mdBuilder = new MetadataBuilder();
+
+            mdBuilder.AddModule(0, default(StringHandle), default(GuidHandle), default(GuidHandle), default(GuidHandle));
+            mdBuilder.AddManifestResource(0, default(StringHandle), default(EntityHandle), 42);
+
+            MetadataReader reader = GetMetadataReader(mdBuilder);
+            Assert.Equal(default(StringHandle), reader.GetManifestResource(ManifestResourceHandle.FromRowId(1)).Name);
+            Assert.Equal(default(EntityHandle).SpecificHandleValue, reader.GetManifestResource(ManifestResourceHandle.FromRowId(1)).Implementation.SpecificHandleValue);
+            Assert.Equal(42, reader.GetManifestResource(ManifestResourceHandle.FromRowId(1)).Offset);
         }
 
         [Fact]
         public unsafe void GetMethodDebugInformationTest()
         {
-            byte[] peImage = (byte[])PortablePdbs.DocumentsPdb.Clone();
-            GCHandle pinned = GetPinnedPEImage(peImage);
-            MetadataReader reader = new MetadataReader((byte*)pinned.AddrOfPinnedObject(), peImage.Length);
-            Assert.Equal(0, reader.GetMethodDebugInformation(MethodDebugInformationHandle.FromRowId(1)).LocalSignature.RowId);
-            Assert.Equal(0, reader.GetMethodDebugInformation(MethodDefinitionHandle.FromRowId(1)).LocalSignature.RowId);
+            MetadataBuilder mdBuilder = new MetadataBuilder();
+
+            mdBuilder.AddModule(0, default(StringHandle), default(GuidHandle), default(GuidHandle), default(GuidHandle));
+            mdBuilder.AddMethodDebugInformation(default(DocumentHandle), default(BlobHandle));
+
+            MetadataReader reader = GetMetadataReader(mdBuilder);
+            Assert.Equal(default(DocumentHandle), reader.GetMethodDebugInformation(MethodDebugInformationHandle.FromRowId(1)).Document);
+            Assert.Equal(default(BlobHandle), reader.GetMethodDebugInformation(MethodDebugInformationHandle.FromRowId(1)).SequencePointsBlob);
+
+            Assert.Equal(default(DocumentHandle), reader.GetMethodDebugInformation(MethodDefinitionHandle.FromRowId(1)).Document);
+            Assert.Equal(default(BlobHandle), reader.GetMethodDebugInformation(MethodDefinitionHandle.FromRowId(1)).SequencePointsBlob);
         }
 
         [Fact]
         public unsafe void GetMethodSpecificationTest()
         {
-            byte[] peImage = (byte[])PortablePdbs.DocumentsPdb.Clone();
-            GCHandle pinned = GetPinnedPEImage(peImage);
-            MetadataReader reader = new MetadataReader((byte*)pinned.AddrOfPinnedObject(), peImage.Length);
-            Assert.Throws<BadImageFormatException>(() => reader.GetMethodSpecification(MethodSpecificationHandle.FromRowId(1)).Method.RowId);
+            MetadataBuilder mdBuilder = new MetadataBuilder();
+
+            mdBuilder.AddModule(0, default(StringHandle), default(GuidHandle), default(GuidHandle), default(GuidHandle));
+            mdBuilder.AddMethodSpecification(default(MethodDefinitionHandle), default(BlobHandle));
+
+            MetadataReader reader = GetMetadataReader(mdBuilder);
+            Assert.Equal(default(MethodDefinitionHandle), reader.GetMethodSpecification(MethodSpecificationHandle.FromRowId(1)).Method);
+            Assert.Equal(default(BlobHandle), reader.GetMethodSpecification(MethodSpecificationHandle.FromRowId(1)).Signature);
         }
 
         [Fact]
         public unsafe void GetLocalScopeTest()
         {
-            byte[] peImage = (byte[])PortablePdbs.DocumentsPdb.Clone();
-            GCHandle pinned = GetPinnedPEImage(peImage);
-            MetadataReader reader = new MetadataReader((byte*)pinned.AddrOfPinnedObject(), peImage.Length);
-            Assert.Equal(1, reader.GetLocalScope(LocalScopeHandle.FromRowId(1)).Method.RowId);
+            MetadataBuilder mdBuilder = new MetadataBuilder();
+
+            mdBuilder.AddModule(0, default(StringHandle), default(GuidHandle), default(GuidHandle), default(GuidHandle));
+            mdBuilder.AddLocalScope(default(MethodDefinitionHandle), default(ImportScopeHandle), default(LocalVariableHandle), default(LocalConstantHandle), 0, 0);
+
+            MetadataReader reader = GetMetadataReader(mdBuilder);
+            Assert.Equal(default(MethodDefinitionHandle), reader.GetLocalScope(LocalScopeHandle.FromRowId(1)).Method);
+            Assert.Equal(default(ImportScopeHandle), reader.GetLocalScope(LocalScopeHandle.FromRowId(1)).ImportScope);
         }
 
         [Fact]
         public unsafe void GetLocalVariableTest()
         {
-            byte[] peImage = (byte[])PortablePdbs.DocumentsPdb.Clone();
-            GCHandle pinned = GetPinnedPEImage(peImage);
-            MetadataReader reader = new MetadataReader((byte*)pinned.AddrOfPinnedObject(), peImage.Length);
-            Assert.Throws<BadImageFormatException>(() => reader.GetLocalVariable(LocalVariableHandle.FromRowId(1)).Index);
+            MetadataBuilder mdBuilder = new MetadataBuilder();
+
+            mdBuilder.AddModule(0, default(StringHandle), default(GuidHandle), default(GuidHandle), default(GuidHandle));
+            mdBuilder.AddLocalVariable(0, 42, default(StringHandle));
+
+            MetadataReader reader = GetMetadataReader(mdBuilder);
+            Assert.Equal(default(StringHandle), reader.GetLocalVariable(LocalVariableHandle.FromRowId(1)).Name);
+            Assert.Equal(42, reader.GetLocalVariable(LocalVariableHandle.FromRowId(1)).Index);
         }
 
         [Fact]
         public unsafe void GetLocalConstantTest()
         {
-            byte[] peImage = (byte[])PortablePdbs.DocumentsPdb.Clone();
-            GCHandle pinned = GetPinnedPEImage(peImage);
-            MetadataReader reader = new MetadataReader((byte*)pinned.AddrOfPinnedObject(), peImage.Length);
-            Assert.Throws<BadImageFormatException>(() => reader.GetLocalConstant(LocalConstantHandle.FromRowId(1)).Name.RawValue);
+            MetadataBuilder mdBuilder = new MetadataBuilder();
+
+            mdBuilder.AddModule(0, default(StringHandle), default(GuidHandle), default(GuidHandle), default(GuidHandle));
+            mdBuilder.AddLocalConstant(default(StringHandle), default(BlobHandle));
+
+            MetadataReader reader = GetMetadataReader(mdBuilder);
+            Assert.Equal(default(StringHandle), reader.GetLocalConstant(LocalConstantHandle.FromRowId(1)).Name);
+            Assert.Equal(default(BlobHandle), reader.GetLocalConstant(LocalConstantHandle.FromRowId(1)).Signature);
         }
 
         [Fact]
         public unsafe void GetImportScopeTest()
         {
-            byte[] peImage = (byte[])PortablePdbs.DocumentsPdb.Clone();
-            GCHandle pinned = GetPinnedPEImage(peImage);
-            MetadataReader reader = new MetadataReader((byte*)pinned.AddrOfPinnedObject(), peImage.Length);
-            Assert.Equal((uint)0, reader.GetImportScope(ImportScopeHandle.FromRowId(1)).ImportsBlob.RawValue);
+            MetadataBuilder mdBuilder = new MetadataBuilder();
+
+            mdBuilder.AddModule(0, default(StringHandle), default(GuidHandle), default(GuidHandle), default(GuidHandle));
+            mdBuilder.AddImportScope(default(ImportScopeHandle), default(BlobHandle));
+
+            MetadataReader reader = GetMetadataReader(mdBuilder);
+            Assert.Equal(default(ImportScopeHandle), reader.GetImportScope(ImportScopeHandle.FromRowId(1)).Parent);
+            Assert.Equal(default(BlobHandle), reader.GetImportScope(ImportScopeHandle.FromRowId(1)).ImportsBlob);
         }
 
         [Fact]
         public unsafe void GetLocalScopesTest()
         {
-            byte[] peImage = (byte[])PortablePdbs.DocumentsPdb.Clone();
-            GCHandle pinned = GetPinnedPEImage(peImage);
-            MetadataReader reader = new MetadataReader((byte*)pinned.AddrOfPinnedObject(), peImage.Length);
+            MetadataBuilder mdBuilder = new MetadataBuilder();
+
+            mdBuilder.AddModule(0, default(StringHandle), default(GuidHandle), default(GuidHandle), default(GuidHandle));
+            mdBuilder.AddLocalScope(MethodDefinitionHandle.FromRowId(1), ImportScopeHandle.FromRowId(1), LocalVariableHandle.FromRowId(1), LocalConstantHandle.FromRowId(1), 0, 1);
+
+            MetadataReader reader = GetMetadataReader(mdBuilder);
             Assert.Equal(1, reader.GetLocalScopes(MethodDefinitionHandle.FromRowId(1)).Count);
             Assert.Equal(1, reader.GetLocalScopes(MethodDebugInformationHandle.FromRowId(1)).Count);
+            Assert.Equal(1, reader.GetLocalScopes(MethodDefinitionHandle.FromRowId(1)).FirstOrDefault<LocalScopeHandle>().RowId);
+            Assert.False(reader.GetLocalScopes(MethodDefinitionHandle.FromRowId(1)).FirstOrDefault<LocalScopeHandle>().IsNil);
+            Assert.Equal(1, reader.GetLocalScopes(MethodDebugInformationHandle.FromRowId(1)).FirstOrDefault<LocalScopeHandle>().RowId);
+            Assert.False(reader.GetLocalScopes(MethodDebugInformationHandle.FromRowId(1)).FirstOrDefault<LocalScopeHandle>().IsNil);
+
+
+            mdBuilder = new MetadataBuilder();
+            mdBuilder.AddModule(0, default(StringHandle), default(GuidHandle), default(GuidHandle), default(GuidHandle));
+
+
+            for (int i = 0; i < 42; i++)
+            {
+                mdBuilder.AddLocalScope(MethodDefinitionHandle.FromRowId(1), ImportScopeHandle.FromRowId(1), LocalVariableHandle.FromRowId(1), LocalConstantHandle.FromRowId(1), 0, 1);
+            }
+
+            reader = GetMetadataReader(mdBuilder);
+            Assert.Equal(42, reader.GetLocalScopes(MethodDefinitionHandle.FromRowId(1)).Count);
+            Assert.Equal(42, reader.GetLocalScopes(MethodDebugInformationHandle.FromRowId(1)).Count);
         }
 
         [Fact]
         public unsafe void GetCustomDebugInformationTest()
         {
-            byte[] peImage = (byte[])PortablePdbs.DocumentsPdb.Clone();
-            GCHandle pinned = GetPinnedPEImage(peImage);
-            MetadataReader reader = new MetadataReader((byte*)pinned.AddrOfPinnedObject(), peImage.Length);
-            Assert.Throws<BadImageFormatException>(() => reader.GetCustomDebugInformation(CustomDebugInformationHandle.FromRowId(1)).Kind.Index);
-            Assert.Equal(0, reader.GetCustomDebugInformation(EntityHandle.ModuleDefinition).Count);
+            MetadataBuilder mdBuilder = new MetadataBuilder();
+
+            mdBuilder.AddModule(0, default(StringHandle), default(GuidHandle), default(GuidHandle), default(GuidHandle));
+            mdBuilder.AddCustomDebugInformation(ModuleDefinitionHandle.FromRowId(1), default(GuidHandle), default(BlobHandle));
+
+            MetadataReader reader = GetMetadataReader(mdBuilder);
+            Assert.Equal(ModuleDefinitionHandle.FromRowId(1), reader.GetCustomDebugInformation(CustomDebugInformationHandle.FromRowId(1)).Parent);
+            Assert.Equal(default(BlobHandle), reader.GetCustomDebugInformation(CustomDebugInformationHandle.FromRowId(1)).Value);
+
+            Assert.Equal(1, reader.GetCustomDebugInformation(EntityHandle.ModuleDefinition).Count);
+            Assert.Equal(1, reader.GetCustomDebugInformation(EntityHandle.ModuleDefinition).FirstOrDefault<CustomDebugInformationHandle>().RowId);
+            Assert.False(reader.GetCustomDebugInformation(EntityHandle.ModuleDefinition).FirstOrDefault<CustomDebugInformationHandle>().IsNil);
+
+            mdBuilder = new MetadataBuilder();
+            mdBuilder.AddModule(0, default(StringHandle), default(GuidHandle), default(GuidHandle), default(GuidHandle));
+            
+            for (int i = 0; i < 42; i++)
+            {
+                mdBuilder.AddCustomDebugInformation(ModuleDefinitionHandle.FromRowId(1), default(GuidHandle), default(BlobHandle));
+            }
+
+            Assert.Equal(1, reader.GetCustomDebugInformation(EntityHandle.ModuleDefinition).Count);
         }
 
         [Fact]
@@ -1086,6 +1162,7 @@ namespace System.Reflection.Metadata.Tests
             Assert.Equal(0, reader.GetDeclaringType(FieldDefinitionHandle.FromRowId(1)).RowId);
         }
 
+        //stop here
         [Fact]
         public unsafe void InvalidSignature()
         {
